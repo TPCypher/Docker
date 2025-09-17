@@ -52,6 +52,11 @@ services:
     volumes:
       - ./java-app:/app
     command: ["java", "-jar", "YourApp.jar"]
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.back.rule=Host(`back.localhost`)"
+      - "traefik.http.routers.back.entrypoints=web"
+      - "traefik.http.services.back.loadbalancer.server.port=8080"
     depends_on:
       - postgres
     networks:
