@@ -11,7 +11,7 @@ services:
     volumes:
       - postgres_data:/var/lib/postgresql/data
     networks:
-      - default
+      - traefik-network
 
   pgadmin:
     image: dpage/pgadmin4:latest
@@ -22,8 +22,10 @@ services:
       - "8080:80"
     depends_on:
       - postgres
+    volumes:
+      - pgadmin_data:/var/lib/pgadmin
     networks:
-      - default
+      - traefik-network
     labels:
       - "traefik.enable=true"
       - "traefik.http.routers.pgadmin.rule=Host(`pgadmin.localhost`)"
@@ -43,7 +45,7 @@ services:
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
     networks:
-      - default
+      - traefik-network
   
   java:
     image: ghcr.io/tpcypher/back/app:latest
@@ -59,14 +61,17 @@ services:
     depends_on:
       - postgres
     networks:
-      - default
+      - traefik-network
 
 volumes:
   postgres_data:
     driver: local
   java_app_data:
     driver: local
+  pgadmin_data:
+    driver: local
 
 networks:
-  default:
-    driver: bridge
+  traefik-network:
+    external: false
+    name: traefik-network
