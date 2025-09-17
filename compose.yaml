@@ -51,7 +51,6 @@ services:
     working_dir: /app
     volumes:
       - ./java-app:/app
-    command: ["java", "-jar", "YourApp.jar"]
     labels:
       - "traefik.enable=true"
       - "traefik.http.routers.back.rule=Host(`back.localhost`)"
@@ -64,6 +63,9 @@ services:
 
 volumes:
   postgres_data:
+    driver: local
+  java_app_data:
+    driver: local
 
 networks:
   default:
