@@ -50,6 +50,7 @@ services:
   java:
     image: ghcr.io/tpcypher/back/app:latest
     container_name: java_app
+    pull_policy: always
     working_dir: /app
     volumes:
       - ./java-app:/app
