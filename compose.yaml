@@ -11,7 +11,7 @@ services:
     volumes:
       - postgres_data:/var/lib/postgresql/data
     networks:
-      - default
+      - traefik-network
 
   pgadmin:
     image: dpage/pgadmin4:latest
@@ -22,8 +22,10 @@ services:
       - "8080:80"
     depends_on:
       - postgres
+    volumes:
+      - pgadmin_data:/var/lib/pgadmin
     networks:
-      - default
+      - traefik-network
     labels:
       - "traefik.enable=true"
       - "traefik.http.routers.pgadmin.rule=Host(`pgadmin.localhost`)"
@@ -43,28 +45,48 @@ services:
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
     networks:
-      - default
+      - traefik-network
   
   java:
     image: ghcr.io/tpcypher/back/app:latest
     container_name: java_app
+    pull_policy: always
     working_dir: /app
     volumes:
       - ./java-app:/app
-    command: ["java", "-jar", "YourApp.jar"]
     labels:
       - "traefik.enable=true"
       - "traefik.http.routers.back.rule=Host(`back.localhost`)"
       - "traefik.http.routers.back.entrypoints=web"
-      - "traefik.http.services.back.loadbalancer.server.port=8080"
+      - "traefik.http.services.back.loadbalancer.server.port=8081"
     depends_on:
       - postgres
     networks:
-      - default
+      - traefik-network
+
+  front-app:
+    image: ghcr.io/tpcypher/front/app:latest
+    pull_policy: always
+    restart: unless-stopped
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.front.rule=Host(`front.localhost`)"
+      - "traefik.http.routers.front.entrypoints=web"
+      - "traefik.http.services.front.loadbalancer.server.port=3000"
+    depends_on:
+      - java
+    networks:
+      - traefik-network
 
 volumes:
   postgres_data:
+    driver: local
+  java_app_data:
+    driver: local
+  pgadmin_data:
+    driver: local
 
 networks:
-  default:
-    driver: bridge
+  traefik-network:
+    external: false
+    name: traefik-network
