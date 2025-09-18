@@ -58,9 +58,23 @@ services:
       - "traefik.enable=true"
       - "traefik.http.routers.back.rule=Host(`back.localhost`)"
       - "traefik.http.routers.back.entrypoints=web"
-      - "traefik.http.services.back.loadbalancer.server.port=8080"
+      - "traefik.http.services.back.loadbalancer.server.port=8081"
     depends_on:
       - postgres
+    networks:
+      - traefik-network
+
+  front-app:
+    image: ghcr.io/tpcypher/front/app:latest
+    pull_policy: always
+    restart: unless-stopped
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.front.rule=Host(`front.localhost`)"
+      - "traefik.http.routers.front.entrypoints=web"
+      - "traefik.http.services.front.loadbalancer.server.port=3000"
+    depends_on:
+      - java
     networks:
       - traefik-network
 
